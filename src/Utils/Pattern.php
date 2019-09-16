@@ -1,19 +1,15 @@
 <?php
 
-namespace Rap2hpoutre\LaravelLogViewer;
+namespace LumenLogViewer\Utils;
 
 /**
  * Class Pattern
+ *
  * @property array patterns
- * @package Rap2hpoutre\LaravelLogViewer
+ * @package LumenLogViewer\Utils
  */
+class Pattern {
 
-class Pattern
-{
-
-    /**
-     * @var array
-     */
     private $patterns = [
         'logs' => '/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}([\+-]\d{4})?\].*/',
         'current_log' => [
@@ -24,24 +20,15 @@ class Pattern
     ];
 
     /**
-     * @return array
-     */
-    public function all()
-    {
-        return array_keys($this->patterns);
-    }
-
-    /**
-     * @param $pattern
-     * @param null $position
+     * @param string $pattern
+     * @param int    $position
+     *
      * @return string pattern
      */
-    public function getPattern($pattern, $position = null)
-    {
+    public function getPattern($pattern, $position = null) {
         if ($position !== null) {
             return $this->patterns[$pattern][$position];
         }
         return $this->patterns[$pattern];
-        
     }
 }

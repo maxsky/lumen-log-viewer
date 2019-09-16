@@ -1,13 +1,13 @@
 <?php
 
-namespace Rap2hpoutre\LaravelLogViewer;
+namespace LumenLogViewer\Utils;
 
 /**
  * Class Level
- * @package Rap2hpoutre\LaravelLogViewer
+ *
+ * @package LumenLogViewer\Utils
  */
-class Level
-{
+class Level {
     /**
      * @var array
      */
@@ -43,26 +43,25 @@ class Level
     /**
      * @return array
      */
-    public function all()
-    {
+    public function all() {
         return array_keys($this->levels_imgs);
     }
 
     /**
      * @param $level
+     *
      * @return string
      */
-    public function img($level)
-    {
+    public function img($level) {
         return $this->levels_imgs[$level];
     }
 
     /**
      * @param $level
+     *
      * @return string
      */
-    public function cssClass($level)
-    {
+    public function cssClass($level) {
         return $this->levels_classes[$level];
     }
 }
