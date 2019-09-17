@@ -4,8 +4,7 @@ namespace LumenLogViewer;
 
 use Exception;
 use Illuminate\Support\Facades\File;
-use LumenLogViewer\Utils\Level;
-use LumenLogViewer\Utils\Pattern;
+use LumenLogViewer\Utils\{Level, Pattern};
 
 /**
  * Class LumenLogViewer
@@ -49,17 +48,16 @@ class LumenLogViewer {
     /**
      * LumenLogViewer constructor.
      *
-     * @param array|string $storage_path
      */
-    public function __construct($storage_path = null) {
+    public function __construct() {
         $this->level = new Level();
         $this->pattern = new Pattern();
-        $this->storage_path = $storage_path ?: config('logviewer.storage_path', storage_path('logs'));
+        $this->storage_path = config('logviewer.storage_path', storage_path('logs'));
     }
 
-    public static function getInstance($storage_path = null) {
+    public static function getInstance() {
         if (!self::$logViewer) {
-            self::$logViewer = new self($storage_path);
+            self::$logViewer = new self();
         }
         return self::$logViewer;
     }

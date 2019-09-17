@@ -3,22 +3,36 @@
 namespace LumenLogViewer\Test;
 
 use Exception;
+use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
+use Illuminate\Http\{RedirectResponse, Request};
+use Illuminate\View\View;
+use LumenLogViewer\Controllers\LogViewerController;
 use LumenLogViewer\LumenLogViewer;
 use LumenLogViewer\Providers\LumenLogViewerServiceProvider;
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use Orchestra\Testbench\TestCase;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class LumenLogViewerTest
  *
  * @package LaravelLogViewer\Test
  */
-class LumenLogViewerTest extends OrchestraTestCase {
+class LumenLogViewerTest extends TestCase {
 
     private $logViewer;
 
+    protected function getEnvironmentSetUp($app) {
+        $app->useEnvironmentPath(__DIR__ . '/../');
+        $app->loadEnvironmentFrom('.env.testing');
+        $app->bootstrapWith([LoadEnvironmentVariables::class]);
+        $app->register(LumenLogViewerServiceProvider::class);
+        parent::getEnvironmentSetUp($app);
+    }
+
     /** @noinspection PhpLanguageLevelInspection */
-    function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
+
         // Copy "lumen.log" file to the orchestra package.
         if (!file_exists(storage_path('logs/lumen.log'))) {
             copy(__DIR__ . '/lumen.log', storage_path('logs/lumen.log'));
@@ -37,17 +51,7 @@ class LumenLogViewerTest extends OrchestraTestCase {
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
-
         $this->assertEquals('lumen.log', $this->logViewer->getFileName());
-    }
-
-    function testSetFileNotExist() {
-        try {
-            $this->logViewer->setFile('not-exist/lumen.log');
-        } catch (Exception $e) {
-            $this->assertTrue(true);
-        }
-        $this->assertFalse(false);
     }
 
     function testAll() {
@@ -57,6 +61,15 @@ class LumenLogViewerTest extends OrchestraTestCase {
         $this->assertEquals('danger', $data[0]['level_class']);
         $this->assertEquals('exclamation-triangle', $data[0]['level_img']);
         $this->assertEquals('2018-09-05 20:20:51', $data[0]['date']);
+    }
+
+    function testSetFileNotExist() {
+        try {
+            $this->logViewer->setFile('not-exist/lumen.log');
+        } catch (Exception $e) {
+            $this->assertTrue(true);
+        }
+        $this->assertFalse(false);
     }
 
     function testAllWithFileNotExist() {
@@ -85,9 +98,13 @@ class LumenLogViewerTest extends OrchestraTestCase {
     }
 
     function testGetFolderFiles() {
-        $log_viewer = LumenLogViewer::getInstance();
-        $data = $log_viewer->getFolderFiles(true);
+        $data = $this->logViewer->getFolderFiles(true);
         $this->assertNotEmpty($data[0], 'Folder files is null');
+    }
+
+    function testSetFolderNotExist() {
+        $this->logViewer->setFolder('abc');
+        $this->assertDirectoryNotExists(storage_path('logs/abc'));
     }
 
     function testSetFolder() {
@@ -95,21 +112,46 @@ class LumenLogViewerTest extends OrchestraTestCase {
         $this->assertTrue($this->logViewer->getFolderName() === storage_path('logs'));
     }
 
-    function testSetFolderNotExist() {
-        $this->logViewer->setFolder('a');
-        $this->assertDirectoryExists(storage_path('logs/a'));
-    }
-
+    /**
+     * @throws Exception
+     */
     function testController() {
-        // TODO:
-        $this->assertTrue(true);
-    }
+        $encrypted = encrypt($this->logViewer->getFolderName());
 
-    function testProvider() {
-        $provider = new LumenLogViewerServiceProvider(app());
-        $provider->boot();
-        $provider->register();
+        $reqParamF = Request::create('/logs', 'GET', ['f' => $encrypted], [], [],
+            ['HTTP_ACCEPT' => 'application/json']);
+        $controller = new LogViewerController($reqParamF);
+        $this->assertIsArray($controller->index());
 
-        $this->assertTrue(true);
+        /** *****************************************************************************/
+
+        $encrypted = encrypt($this->logViewer->getFolderName() . '/lumen.log');
+
+        $reqFileContent = Request::create('/logs', 'GET', ['l' => $encrypted]);
+        $controller = new LogViewerController($reqFileContent);
+        $this->assertInstanceOf(View::class, $controller->index());
+
+        $reqDownload = Request::create('/logs', 'GET', ['dl' => $encrypted]);
+        $controller = new LogViewerController($reqDownload);
+        $this->assertInstanceOf(BinaryFileResponse::class, $controller->index());
+
+        $reqCleanFile = Request::create('/logs', 'GET', ['clean' => $encrypted]);
+        $controller = new LogViewerController($reqCleanFile);
+        $this->assertInstanceOf(RedirectResponse::class, $controller->index());
+
+        $reqDeleteOne = Request::create('/logs', 'GET', ['del' => $encrypted]);
+        $controller = new LogViewerController($reqDeleteOne);
+        $this->assertInstanceOf(RedirectResponse::class, $controller->index());
+
+        if (!file_exists(storage_path('logs/lumen1.log'))) {
+            copy(__DIR__ . '/lumen.log', storage_path('logs/lumen1.log'));
+        }
+
+        $reqDeleteAll = Request::create('/logs', 'GET', ['delall' => 'true']);
+        $controller = new LogViewerController($reqDeleteAll);
+        $respA = $controller->index();
+        $this->logViewer->setFolder(null);
+        $respB = $controller->index();
+        $this->assertTrue($respA instanceof RedirectResponse && $respB instanceof RedirectResponse);
     }
 }

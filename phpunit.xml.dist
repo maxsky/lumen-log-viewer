@@ -3,13 +3,13 @@
          convertNoticesToExceptions="true" convertWarningsToExceptions="true"
          stopOnError="false" stopOnFailure="false" stopOnIncomplete="false" stopOnSkipped="false">
     <testsuites>
-        <testsuite name="all">
-            <directory suffix="LumenLogViewerTest.php">tests/</directory>
+        <testsuite name="All">
+            <directory suffix="LumenLogViewerTest.php">./tests</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist>
-            <directory suffix=".php">src/</directory>
+            <directory suffix=".php">./src</directory>
         </whitelist>
     </filter>
     <logging>

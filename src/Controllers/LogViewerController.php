@@ -3,16 +3,24 @@
 namespace LumenLogViewer\Controllers;
 
 use Exception;
-use Illuminate\Support\Facades\{Crypt, File, Request, View};
-use Laravel\Lumen\Routing\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{Crypt, File, View};
 use LumenLogViewer\LumenLogViewer;
+
+if (class_exists('Laravel\Lumen\Routing\Controller')) {
+    class Controller extends \Laravel\Lumen\Routing\Controller {
+    }
+} else {
+    class Controller extends \Illuminate\Routing\Controller {
+    }
+}
 
 /**
  * Class LogViewerController
  *
  * @package LumenLogViewer\Controllers
  */
-class LogViewerController extends Controller{
+class LogViewerController extends Controller {
     /**
      * @var Request
      */
@@ -29,10 +37,12 @@ class LogViewerController extends Controller{
 
     /**
      * LogViewerController constructor.
+     *
+     * @param Request $request
      */
-    public function __construct() {
+    public function __construct(Request $request) {
         $this->log_viewer = LumenLogViewer::getInstance();
-        $this->request = Request::instance();
+        $this->request = $request;
     }
 
     /**
