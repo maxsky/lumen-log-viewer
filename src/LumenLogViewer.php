@@ -31,9 +31,9 @@ class LumenLogViewer {
     private $storage_path;
 
     /**
-     * Why? Uh... Sorry
+     * @var int
      */
-    const MAX_FILE_SIZE = 52428800;
+    private $max_file_size;
 
     /**
      * @var Level level
@@ -52,6 +52,7 @@ class LumenLogViewer {
     public function __construct() {
         $this->level = new Level();
         $this->pattern = new Pattern();
+        $this->max_file_size = config('logviewer.max_file_size', 52428800);
         $this->storage_path = config('logviewer.storage_path', storage_path('logs'));
     }
 
