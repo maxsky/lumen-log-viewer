@@ -138,7 +138,7 @@ class LumenLogViewer {
             $this->file = $log_file[0];
         }
 
-        $max_file_size = function_exists('config') ? config('logviewer.max_file_size', self::MAX_FILE_SIZE) : self::MAX_FILE_SIZE;
+        $max_file_size = function_exists('config') ? config('logviewer.max_file_size', $this->max_file_size) : $this->max_file_size;
         if (File::size($this->file) > $max_file_size) {
             return null;
         }
