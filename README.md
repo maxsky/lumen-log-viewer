@@ -9,7 +9,7 @@
 
 Small log viewer for lumen. Looks like this:
 
-![capture d ecran 2014-12-01 a 10 37 18](https://cloud.githubusercontent.com/assets/1575946/5243642/8a00b83a-7946-11e4-8bad-5c705f328bcc.png)
+![screenshot](https://github.com/maxsky/lumen-log-viewer/raw/master/screenshot.png)
 
 ## Install
 
